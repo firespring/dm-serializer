@@ -4,12 +4,15 @@ source 'https://rubygems.org'
 
 gemspec
 
+SOURCE         = ENV.fetch('SOURCE', :git).to_sym
+REPO_POSTFIX   = (SOURCE == :path) ? '' : '.git'
+DATAMAPPER     = (SOURCE == :path) ? Pathname(__FILE__).dirname.parent : 'https://github.com/firespring'
 DM_VERSION     = '~> 1.3.0.beta'.freeze
 DO_VERSION     = '~> 0.10.6'.freeze
 DM_DO_ADAPTERS = %w(sqlite postgres mysql oracle sqlserver).freeze
 CURRENT_BRANCH = ENV.fetch('GIT_BRANCH', 'master')
 
-gem 'dm-core', DM_VERSION, git: "firespring/dm-core", branch: CURRENT_BRANCH
+gem 'dm-core', DM_VERSION, SOURCE => "#{DATAMAPPER}/dm-core#{REPO_POSTFIX}", branch: CURRENT_BRANCH
 
 gem 'fastercsv',  '~> 1.5.4'
 gem 'json',       '~> 1.5.4', platforms: %i(ruby_18 jruby)
@@ -17,7 +20,7 @@ gem 'json_pure',  '~> 1.5.4', platforms: [:mswin]
 gem 'multi_json'
 
 group :development do
-  gem 'dm-validations', DM_VERSION, git: "firespring/dm-validations", :branch => CURRENT_BRANCH
+  gem 'dm-validations', DM_VERSION, SOURCE => "#{DATAMAPPER}/dm-validations#{REPO_POSTFIX}", branch: CURRENT_BRANCH
   gem 'rake'
   gem 'rspec'
 end
@@ -29,22 +32,19 @@ end
 
 platforms :mri_18 do
   group :quality do
-
     gem 'rcov'
     gem 'yard'
     gem 'yardstick'
-
   end
 end
 
 group :datamapper do
-
   adapters = ENV['ADAPTER'] || ENV.fetch('ADAPTERS', nil)
   adapters = adapters.to_s.tr(',', ' ').split.uniq - %w(in_memory)
 
   if (do_adapters = DM_DO_ADAPTERS & adapters).any?
     do_options = {}
-    do_options[:git] = "firespring/datamapper-do" if ENV['DO_GIT'] == 'true'
+    do_options[:git] = "#{DATAMAPPER}/datamapper-do#{REPO_POSTFIX}" if ENV['DO_GIT'] == 'true'
 
     gem 'data_objects', DO_VERSION, do_options.dup
 
@@ -53,17 +53,17 @@ group :datamapper do
       gem "do_#{adapter}", DO_VERSION, do_options.dup
     end
 
-    gem 'dm-do-adapter', DM_VERSION, git: "firespring/dm-do-adapter", branch: CURRENT_BRANCH
+    gem 'dm-do-adapter', DM_VERSION, SOURCE => "#{DATAMAPPER}/dm-do-adapter#{REPO_POSTFIX}", branch: CURRENT_BRANCH
   end
 
   adapters.each do |adapter|
-    gem "dm-#{adapter}-adapter", DM_VERSION, git: "firespring/dm-#{adapter}-adapter", branch: CURRENT_BRANCH
+    gem "dm-#{adapter}-adapter", DM_VERSION, SOURCE => "#{DATAMAPPER}/dm-#{adapter}-adapter#{REPO_POSTFIX}", branch: CURRENT_BRANCH
   end
 
   plugins = ENV['PLUGINS'] || ENV.fetch('PLUGIN', nil)
   plugins = plugins.to_s.tr(',', ' ').split.push('dm-migrations').uniq
 
   plugins.each do |plugin|
-    gem plugin, DM_VERSION, git: "firespring/#{plugin}", branch: CURRENT_BRANCH
+    gem plugin, DM_VERSION, SOURCE => "#{DATAMAPPER}/#{plugin}#{REPO_POSTFIX}", branch: CURRENT_BRANCH
   end
 end
