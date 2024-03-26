@@ -19,8 +19,8 @@ else
 end
 
 gem 'fastercsv',  '~> 1.5.4'
-gem 'json',       '~> 1.5.4', platforms: %i(ruby_18 jruby)
-gem 'json_pure',  '~> 1.5.4', platforms: [:mswin]
+gem 'json',       '~> 2.7', platforms: %i(ruby_18 jruby)
+gem 'json_pure',  '~> 2.7', platforms: [:mswin]
 gem 'multi_json'
 
 group :development do
@@ -34,8 +34,8 @@ group :development do
 end
 
 group :testing do
-  gem 'libxml-ruby', '~> 2.2.2', platforms: %i(mri mswin)
-  gem 'nokogiri',    '~> 1.4.4'
+  gem 'libxml-ruby', '~> 5.0', platforms: %i(mri mswin)
+  gem 'nokogiri',    '~> 1.15'
 end
 
 platforms :mri_18 do
