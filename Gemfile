@@ -20,7 +20,6 @@ end
 
 gem 'fastercsv',  '~> 1.5.4'
 gem 'json',       '~> 2.7', platforms: %i(ruby_18 jruby)
-gem 'json_pure',  '~> 2.7', platforms: [:mswin]
 gem 'multi_json'
 
 group :development do
