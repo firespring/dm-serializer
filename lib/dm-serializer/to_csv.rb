@@ -1,7 +1,7 @@
 require 'dm-serializer/common'
 
 if RUBY_VERSION >= '1.9.0'
- require 'csv'
+  require 'csv'
 else
   begin
     require 'fastercsv'
@@ -19,7 +19,7 @@ module DataMapper
     def to_csv(*args)
       options = args.first || {}
       options = options.to_h if options.respond_to?(:to_h)
-      options[:writer] = '' unless options.has_key? :writer
+      options[:writer] = '' unless options.key? :writer
 
       CSV.generate(options[:writer]) do |csv|
         row = properties_to_serialize(options).map do |property|
@@ -34,7 +34,7 @@ module DataMapper
         def to_csv(*args)
           options = args.first || {}
           options = options.to_h if options.respond_to?(:to_h)
-          options[:writer] = '' unless options.has_key? :writer
+          options[:writer] = '' unless options.key? :writer
 
           CSV.generate(options[:writer]) do |csv|
             violations.each do |key, value|
@@ -55,7 +55,7 @@ module DataMapper
     def to_csv(*args)
       result = ''
       each do |item|
-        result << item.to_csv(args.first) + "\n"
+        result << ("#{item.to_csv(args.first)}\n")
       end
       result
     end

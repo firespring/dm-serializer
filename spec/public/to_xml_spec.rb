@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'rexml/document'
 
-[:rexml, :libxml, :nokogiri].each do |lib|
+%i(rexml libxml nokogiri).each do |lib|
   begin
     DataMapper::Serializer::XML.serializer = lib
   rescue LoadError => e
@@ -14,27 +14,25 @@ require 'rexml/document'
     before(:all) do
       DataMapper.finalize
 
-      @harness = Class.new(SerializerTestHarness) {
+      @harness = Class.new(SerializerTestHarness) do
         def method_name
           :to_xml
         end
 
-        protected
-
-        def deserialize(result)
+        protected def deserialize(result)
           f = lambda do |element|
-            case element.attributes["type"]
-            when "hash"
+            case element.attributes['type']
+            when 'hash'
               element.elements.to_a.inject({}) do |a, e|
                 a.update(e.name => f[e])
               end
-            when "array"
+            when 'array'
               element.elements.collect do |e|
                 f[e]
               end
             else
               if element.elements.empty?
-                cast(element.text, element.attributes["type"])
+                cast(element.text, element.attributes['type'])
               else
                 element.elements.to_a.inject({}) do |a, e|
                   a.update(e.name => f[e])
@@ -47,34 +45,34 @@ require 'rexml/document'
           f[doc.elements[1]]
         end
 
-        def cast(value, type)
-          boolean_conversions = {"true" => true, "false" => false}
-          value = boolean_conversions[value] if boolean_conversions.has_key?(value)
-          value = value.to_i if value && ["integer", "datamapper::types::serial"].include?(type)
+        protected def cast(value, type)
+          boolean_conversions = {'true' => true, 'false' => false}
+          value = boolean_conversions[value] if boolean_conversions.key?(value)
+          value = value.to_i if value && %w(integer datamapper::types::serial).include?(type)
           value
         end
-      }.new
+      end.new
     end
 
-    it_should_behave_like "A serialization method"
+    it_should_behave_like 'A serialization method'
 
-    it "should not include the XML prologue, so that the result can be embedded in other XML documents" do
+    it 'should not include the XML prologue, so that the result can be embedded in other XML documents' do
       planet = Planet.new
-      xml = planet.to_xml(:element_name => "aplanet")
+      xml = planet.to_xml(element_name: 'aplanet')
       xml.should_not match(/\A<?xml/)
     end
 
     describe ':element_name option for Resource' do
       it 'should be used as the root node name by #to_xml' do
         planet = Planet.new
-        xml = planet.to_xml(:element_name => "aplanet")
-        REXML::Document.new(xml).elements[1].name.should == "aplanet"
+        xml = planet.to_xml(element_name: 'aplanet')
+        expect(REXML::Document.new(xml).elements[1].name).to eq 'aplanet'
       end
 
       it 'when not specified the class name underscored and with slashes replaced with dashes should be used as the root node name' do
         cat = QuanTum::Cat.new
         xml = cat.to_xml
-        REXML::Document.new(xml).elements[1].name.should == "quan_tum-cat"
+        expect(REXML::Document.new(xml).elements[1].name).to eq 'quan_tum-cat'
       end
     end
 
@@ -87,23 +85,23 @@ require 'rexml/document'
 
       it 'when not specified the class name tableized and with slashes replaced with dashes should be used as the root node name' do
         xml = DataMapper::Collection.new(@query).to_xml
-        REXML::Document.new(xml).elements[1].name.should == "quan_tum-cats"
+        expect(REXML::Document.new(xml).elements[1].name).to eq 'quan_tum-cats'
       end
 
       it 'should be used as the root node name by #to_xml' do
-        resources = @model.load([ { 'id' => 1 } ], @query)
+        resources = @model.load([{'id' => 1}], @query)
         @collection = DataMapper::Collection.new(@query, resources)
 
-        xml = @collection.to_xml(:collection_element_name => "somanycats")
-        REXML::Document.new(xml).elements[1].name.should == "somanycats"
+        xml = @collection.to_xml(collection_element_name: 'somanycats')
+        expect(REXML::Document.new(xml).elements[1].name).to eq 'somanycats'
       end
 
       it 'should respect :element_name for collection elements' do
-        resources = @model.load([ { 'id' => 1 } ], @query)
+        resources = @model.load([{'id' => 1}], @query)
         @collection = DataMapper::Collection.new(@query, resources)
 
-        xml = @collection.to_xml(:collection_element_name => "somanycats", :element_name => 'cat')
-        REXML::Document.new(xml).elements[1].elements[1].name.should == "cat"
+        xml = @collection.to_xml(collection_element_name: 'somanycats', element_name: 'cat')
+        expect(REXML::Document.new(xml).elements[1].elements[1].name).to eq 'cat'
       end
     end
   end
