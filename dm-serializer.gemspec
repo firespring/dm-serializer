@@ -4,8 +4,10 @@ Gem::Specification.new do |gem|
   gem.authors     = ['Guy van den Berg', 'Dan Kubb']
   gem.email       = ['dan.kubb@gmail.com']
   gem.summary     = 'DataMapper plugin for serializing Resources and Collections'
-  gem.description = gem.summary
-  gem.homepage    = 'https://datamapper.org'
+  gem.description = 'dm-serializer allows DataMapper models and collections to be serialized to a variety of formats ' \
+                    '(currently JSON, XML, YAML and CSV)'
+  gem.license = 'Nonstandard'
+  gem.homepage = 'https://datamapper.org'
 
   gem.files            = `git ls-files`.split("\n")
   gem.extra_rdoc_files = %w(LICENSE README.rdoc)
