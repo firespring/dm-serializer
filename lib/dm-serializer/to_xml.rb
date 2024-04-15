@@ -20,12 +20,12 @@ module DataMapper
     # * root_node
     # * add_property_node
     # * add_node
-    def to_xml_document(opts={}, doc = nil)
+    def to_xml_document(opts = {}, doc = nil)
       xml = XML.serializer
       doc ||= xml.new_document
 
       default_xml_element_name = lambda {
-        DataMapper::Inflector.underscore(model.name).tr("/", "-")
+        DataMapper::Inflector.underscore(model.name).tr('/', '-')
       }
 
       root = xml.root_node(
@@ -38,25 +38,21 @@ module DataMapper
         attrs = {}
 
         dump_class = property.dump_class
-
-        unless dump_class == ::String
-          attrs['type'] = dump_class.to_s.downcase
-        end
-
+        attrs['type'] = dump_class.to_s.downcase unless dump_class == ::String
         xml.add_node(root, property.name.to_s, value, attrs)
       end
 
       Array(opts[:methods]).each do |meth|
-        if self.respond_to?(meth)
-          xml_name = meth.to_s.gsub(/[^a-z0-9_]/, '')
-          value = __send__(meth)
+        next unless respond_to?(meth)
 
-          unless value.nil?
-            if value.respond_to?(:to_xml_document)
-              xml.add_xml(root, value.to_xml_document)
-            else
-              xml.add_node(root, xml_name, value.to_s)
-            end
+        xml_name = meth.to_s.gsub(/[^a-z0-9_]/, '')
+        value = __send__(meth)
+
+        unless value.nil?
+          if value.respond_to?(:to_xml_document)
+            xml.add_xml(root, value.to_xml_document)
+          else
+            xml.add_node(root, xml_name, value.to_s)
           end
         end
       end
@@ -70,17 +66,17 @@ module DataMapper
           to_xml_document(opts).to_s
         end
 
-        def to_xml_document(opts = {})
+        def to_xml_document(_opts = {})
           xml = DataMapper::Serializer::XML.serializer
           doc = xml.new_document
-          root = xml.root_node(doc, "errors", {'type' => 'hash'})
+          root = xml.root_node(doc, 'errors', {'type' => 'hash'})
 
           violations.each do |key, value|
             property = xml.add_node(root, key.to_s, nil, {'type' => 'array'})
-            property.attributes["type"] = 'array'
+            property.attributes['type'] = 'array'
 
             value.each do |error|
-              xml.add_node(property, "error", error)
+              xml.add_node(property, 'error', error)
             end
           end
 
@@ -88,7 +84,6 @@ module DataMapper
         end
       end
     end
-
   end
 
   class Collection
@@ -101,16 +96,16 @@ module DataMapper
       doc = xml.new_document
 
       default_collection_element_name = lambda {
-        DataMapper::Inflector.pluralize(DataMapper::Inflector.underscore(self.model.to_s)).tr("/", "-")
+        DataMapper::Inflector.pluralize(DataMapper::Inflector.underscore(model.to_s)).tr('/', '-')
       }
 
-      root = xml.root_node(
+      xml.root_node(
         doc,
         opts[:collection_element_name] || default_collection_element_name[],
         {'type' => 'array'}
       )
 
-      self.each do |item|
+      each do |item|
         item.to_xml_document(opts, doc)
       end
 

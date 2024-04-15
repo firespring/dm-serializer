@@ -27,13 +27,15 @@ module DataMapper
     # @return [String]
     #
     # @api public
-    def to_yaml(options = {})
-      YAML.quick_emit(object_id, options) do |out|
-        out.map(to_yaml_type, to_yaml_style) do |map|
-          encode_with(map, options.kind_of?(Hash) ? options : {})
+    unless YAML.const_defined?(:ENGINE) && !YAML::ENGINE.syck?
+      def to_yaml(options = {})
+        YAML.quick_emit(object_id, options) do |out|
+          out.map(to_yaml_type, to_yaml_style) do |map|
+            encode_with(map, options.is_a?(Hash) ? options : {})
+          end
         end
       end
-    end unless YAML.const_defined?(:ENGINE) && !YAML::ENGINE.syck?
+    end
 
     # A callback to encode the resource in the YAML stream
     #
@@ -52,7 +54,7 @@ module DataMapper
 
       methods = []
 
-      methods.concat properties_to_serialize(options).map { |property| property.name }
+      methods.concat(properties_to_serialize(options).map(&:name))
       methods.concat Array(options[:methods])
 
       methods.each do |method|
@@ -60,14 +62,12 @@ module DataMapper
       end
     end
 
-  private
-
     # Return the YAML type to use for the output
     #
     # @return [String]
     #
     # @api private
-    def to_yaml_type
+    private def to_yaml_type
       "!#{TAG_NAME}:#{model.name}"
     end
 
@@ -76,25 +76,26 @@ module DataMapper
     # @return [Integer]
     #
     # @api private
-    def to_yaml_style
-      Psych::Nodes::Mapping::ANY
-    end if YAML.const_defined?(:ENGINE) && YAML::ENGINE.yamler == 'psych'
+    if YAML.const_defined?(:ENGINE) && YAML::ENGINE.yamler == 'psych'
+      def to_yaml_style
+        Psych::Nodes::Mapping::ANY
+      end
+    end
 
     module ValidationErrors
       module ToYaml
-
         # Serialize the errors to YAML
         #
         # @example
         #   yaml = errors.to_yaml  # => a valid YAML string
         #
-        # @param [Hash] options
+        # @param [Hash] args
         #
         # @return [String]
         #
         # @api public
         def to_yaml(*args)
-          Hash[violations].to_yaml(*args)
+          violations.to_h.to_yaml(*args)
         end
 
         # A callback to encode the errors in the YAML stream
@@ -106,21 +107,19 @@ module DataMapper
         #
         # @api public
         def encode_with(coder)
-          coder.map = Hash[errors]
+          coder.map = errors.to_h
         end
-
-      end # module ToYaml
-    end # module ValidationErrors
+      end
+    end
 
     module Collection
       module ToYaml
-
         # Serialize the collection to YAML
         #
         # @example
         #   yaml = collection.to_yaml  # => a valid YAML string
         #
-        # @param [Hash] options
+        # @param [Hash] args
         #
         # @return [String]
         #
@@ -140,21 +139,19 @@ module DataMapper
         def encode_with(coder)
           coder.seq = to_a
         end
-
-      end # module ToYaml
-    end # module Collection
-  end # module Serializer
+      end
+    end
+  end
 
   class Collection
     include Serializer::Collection::ToYaml
-  end # class Collection
+  end
 
   if const_defined?(:Validations)
     module Validations
       class ValidationErrors
         include DataMapper::Serializer::ValidationErrors::ToYaml
-      end # class ValidationErrors
-    end # module Validations
+      end
+    end
   end
-
-end # module DataMapper
+end

@@ -14,11 +14,11 @@ describe DataMapper::Serializer, '#to_yaml' do
 
       def deserialize(result)
         result = YAML.load(result)
-        process = lambda {|object|
+        process = lambda { |object|
           if object.is_a?(Array)
             object.collect(&process)
           elsif object.is_a?(Hash)
-            object.inject({}) {|a, (key, value)| a.update(key.to_s => process[value]) }
+            object.inject({}) { |a, (key, value)| a.update(key.to_s => process[value]) }
           else
             object
           end
@@ -36,24 +36,24 @@ describe DataMapper::Serializer, '#to_yaml' do
 
   it 'should allow static YAML dumping' do
     object = Cow.create(
-      :id        => 89,
-      :composite => 34,
-      :name      => 'Berta',
-      :breed     => 'Guernsey'
+      id: 89,
+      composite: 34,
+      name: 'Berta',
+      breed: 'Guernsey'
     )
     result = @harness.deserialize(YAML.dump(object))
     result['name'].should == 'Berta'
   end
 
   it 'should allow static YAML dumping of a collection' do
-    object = Cow.create(
-      :id        => 89,
-      :composite => 34,
-      :name      => 'Berta',
-      :breed     => 'Guernsey'
+    Cow.create(
+      id: 89,
+      composite: 34,
+      name: 'Berta',
+      breed: 'Guernsey'
     )
     result = @harness.deserialize(YAML.dump(Cow.all))
-    result[0]['name'].should == 'Berta'
+    expect(result[0]['name']).to eq 'Berta'
   end
 
 end

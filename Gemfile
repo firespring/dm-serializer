@@ -1,55 +1,57 @@
 require 'pathname'
 
-source :rubygems
+source 'https://rubygems.org'
 
 gemspec
 
 SOURCE         = ENV.fetch('SOURCE', :git).to_sym
-REPO_POSTFIX   = SOURCE == :path ? ''                                : '.git'
-DATAMAPPER     = SOURCE == :path ? Pathname(__FILE__).dirname.parent : 'http://github.com/datamapper'
-DM_VERSION     = '~> 1.3.0.beta'
-DO_VERSION     = '~> 0.10.6'
-DM_DO_ADAPTERS = %w[ sqlite postgres mysql oracle sqlserver ]
+REPO_POSTFIX   = (SOURCE == :path) ? '' : '.git'
+DATAMAPPER     = (SOURCE == :path) ? Pathname(__FILE__).dirname.parent : 'https://github.com/firespring'
+DM_VERSION     = '~> 1.3.0.beta'.freeze
+DO_VERSION     = '~> 0.10.6'.freeze
+DM_DO_ADAPTERS = %w(sqlite postgres mysql oracle sqlserver).freeze
 CURRENT_BRANCH = ENV.fetch('GIT_BRANCH', 'master')
 
-gem 'dm-core', DM_VERSION,
-  SOURCE  => "#{DATAMAPPER}/dm-core#{REPO_POSTFIX}",
-  :branch => CURRENT_BRANCH
+if SOURCE == :path
+  gem 'dm-core', DM_VERSION, SOURCE => "#{DATAMAPPER}/dm-core#{REPO_POSTFIX}"
+else
+  gem 'dm-core', DM_VERSION, SOURCE => "#{DATAMAPPER}/dm-core#{REPO_POSTFIX}", branch: CURRENT_BRANCH
+end
 
 gem 'fastercsv',  '~> 1.5.4'
-gem 'multi_json', '~> 1.3.2'
-gem 'json',       '~> 1.5.4', :platforms => [ :ruby_18, :jruby ]
-gem 'json_pure',  '~> 1.5.4', :platforms => [ :mswin ]
+gem 'json',       '~> 2.7', platforms: %i(ruby_18 jruby)
+gem 'multi_json'
 
 group :development do
-  gem 'dm-validations', DM_VERSION,
-    SOURCE  => "#{DATAMAPPER}/dm-validations#{REPO_POSTFIX}",
-    :branch => CURRENT_BRANCH
+  if SOURCE == :path
+    gem 'dm-validations', DM_VERSION, SOURCE => "#{DATAMAPPER}/dm-validations#{REPO_POSTFIX}"
+  else
+    gem 'dm-validations', DM_VERSION, SOURCE => "#{DATAMAPPER}/dm-validations#{REPO_POSTFIX}", branch: CURRENT_BRANCH
+  end
+  gem 'rake'
+  gem 'rspec'
 end
 
 group :testing do
-  gem 'nokogiri',    '~> 1.4.4'
-  gem 'libxml-ruby', '~> 2.2.2', :platforms => [ :mri, :mswin ]
+  gem 'libxml-ruby', '~> 5.0', platforms: %i(mri mswin)
+  gem 'nokogiri',    '~> 1.15'
 end
 
 platforms :mri_18 do
   group :quality do
-
-    gem 'rcov',      '~> 0.9.10'
-    gem 'yard',      '~> 0.7.2'
-    gem 'yardstick', '~> 0.4'
-
+    gem 'rcov'
+    gem 'yard'
+    gem 'yardstick'
   end
 end
 
 group :datamapper do
-
-  adapters = ENV['ADAPTER'] || ENV['ADAPTERS']
-  adapters = adapters.to_s.tr(',', ' ').split.uniq - %w[ in_memory ]
+  adapters = ENV['ADAPTER'] || ENV.fetch('ADAPTERS', nil)
+  adapters = adapters.to_s.tr(',', ' ').split.uniq - %w(in_memory)
 
   if (do_adapters = DM_DO_ADAPTERS & adapters).any?
     do_options = {}
-    do_options[:git] = "#{DATAMAPPER}/do#{REPO_POSTFIX}" if ENV['DO_GIT'] == 'true'
+    do_options[:git] = "#{DATAMAPPER}/datamapper-do#{REPO_POSTFIX}" if ENV['DO_GIT'] == 'true'
 
     gem 'data_objects', DO_VERSION, do_options.dup
 
@@ -58,24 +60,29 @@ group :datamapper do
       gem "do_#{adapter}", DO_VERSION, do_options.dup
     end
 
-    gem 'dm-do-adapter', DM_VERSION,
-      SOURCE  => "#{DATAMAPPER}/dm-do-adapter#{REPO_POSTFIX}",
-      :branch => CURRENT_BRANCH
+    if SOURCE == :path
+      gem 'dm-do-adapter', DM_VERSION, SOURCE => "#{DATAMAPPER}/dm-do-adapter#{REPO_POSTFIX}"
+    else
+      gem 'dm-do-adapter', DM_VERSION, SOURCE => "#{DATAMAPPER}/dm-do-adapter#{REPO_POSTFIX}", branch: CURRENT_BRANCH
+    end
   end
 
   adapters.each do |adapter|
-    gem "dm-#{adapter}-adapter", DM_VERSION,
-      SOURCE  => "#{DATAMAPPER}/dm-#{adapter}-adapter#{REPO_POSTFIX}",
-      :branch => CURRENT_BRANCH
+    if SOURCE == :path
+      gem "dm-#{adapter}-adapter", DM_VERSION, SOURCE => "#{DATAMAPPER}/dm-#{adapter}-adapter#{REPO_POSTFIX}"
+    else
+      gem "dm-#{adapter}-adapter", DM_VERSION, SOURCE => "#{DATAMAPPER}/dm-#{adapter}-adapter#{REPO_POSTFIX}", branch: CURRENT_BRANCH
+    end
   end
 
-  plugins = ENV['PLUGINS'] || ENV['PLUGIN']
+  plugins = ENV['PLUGINS'] || ENV.fetch('PLUGIN', nil)
   plugins = plugins.to_s.tr(',', ' ').split.push('dm-migrations').uniq
 
   plugins.each do |plugin|
-    gem plugin, DM_VERSION,
-      SOURCE  => "#{DATAMAPPER}/#{plugin}#{REPO_POSTFIX}",
-      :branch => CURRENT_BRANCH
+    if SOURCE == :path
+      gem plugin, DM_VERSION, SOURCE => "#{DATAMAPPER}/#{plugin}#{REPO_POSTFIX}"
+    else
+      gem plugin, DM_VERSION, SOURCE => "#{DATAMAPPER}/#{plugin}#{REPO_POSTFIX}", branch: CURRENT_BRANCH
+    end
   end
-
 end

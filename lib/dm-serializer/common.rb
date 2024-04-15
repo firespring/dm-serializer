@@ -2,9 +2,8 @@ require 'dm-core'
 
 module DataMapper
   module Serializer
-
-    # Returns propreties to serialize based on :only or :exclude arrays,
-    # if provided :only takes precendence over :exclude
+    # Returns properties to serialize based on :only or :exclude arrays,
+    # if provided :only takes precedence over :exclude
     #
     # @return [Array]
     #   Properties that need to be serialized.
@@ -17,8 +16,8 @@ module DataMapper
           false
         else
           excluded_properties.include?(p.name) ||
-          !(only_properties.empty? ||
-          only_properties.include?(p.name))
+            !(only_properties.empty? ||
+            only_properties.include?(p.name))
         end
       end
     end

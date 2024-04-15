@@ -3,10 +3,10 @@ module DataMapper
     module XML
       # The supported XML Serializers
       SERIALIZERS = {
-        :libxml => 'LibXML',
-        :nokogiri => 'Nokogiri',
-        :rexml => 'REXML'
-      }
+        libxml: 'LibXML',
+        nokogiri: 'Nokogiri',
+        rexml: 'REXML'
+      }.freeze
 
       #
       # The current XML Serializer.
@@ -43,7 +43,7 @@ module DataMapper
         @serializer = const_get(serializer_const)
       end
 
-      [:nokogiri, :libxml, :rexml].each do |name|
+      %i(nokogiri libxml rexml).each do |name|
         # attempt to load the first available XML Serializer
         begin
           self.serializer = name

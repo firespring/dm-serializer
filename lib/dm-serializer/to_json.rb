@@ -22,28 +22,25 @@ module DataMapper
       properties_to_serialize(options).each do |property|
         property_name = property.name
         value = __send__(property_name)
-        result[property_name] = value.kind_of?(DataMapper::Model) ? value.name : value
+        result[property_name] = value.is_a?(DataMapper::Model) ? value.name : value
       end
 
       # add methods
       Array(options[:methods]).each do |method|
         next unless respond_to?(method)
+
         result[method] = __send__(method)
       end
 
-      # Note: if you want to include a whole other model via relation, use
+      # NOTE: if you want to include a whole other model via relation, use
       # :methods:
       #
       #   comments.to_json(:relationships=>{:user=>{:include=>[:first_name],:methods=>[:age]}})
       #
       # TODO: This needs tests and also needs to be ported to #to_xml and
       # #to_yaml
-      if options[:relationships]
-        options[:relationships].each do |relationship_name, opts|
-          if respond_to?(relationship_name)
-            result[relationship_name] = __send__(relationship_name).to_json(opts.merge(:to_json => false))
-          end
-        end
+      options[:relationships]&.each do |relationship_name, opts|
+        result[relationship_name] = __send__(relationship_name).to_json(opts.merge(to_json: false)) if respond_to?(relationship_name)
       end
 
       result
@@ -54,7 +51,7 @@ module DataMapper
     # @return <String> a JSON representation of the Resource
     def to_json(*args)
       options = args.first
-      options = {} unless options.kind_of?(Hash)
+      options = {} unless options.is_a?(Hash)
 
       result = as_json(options)
 
@@ -68,20 +65,19 @@ module DataMapper
 
     module ValidationErrors
       module ToJson
-        def to_json(*args)
-          MultiJson.dump(Hash[ violations ])
+        def to_json(*_args)
+          MultiJson.dump(violations.to_h)
         end
       end
     end
-
   end
 
   class Collection
     def to_json(*args)
       options = args.first
-      options = {} unless options.kind_of?(Hash)
+      options = {} unless options.is_a?(Hash)
 
-      resource_options = options.merge(:to_json => false)
+      resource_options = options.merge(to_json: false)
       collection = map { |resource| resource.to_json(resource_options) }
 
       # default to making JSON

@@ -11,8 +11,8 @@ if defined?(::CSV)
       query = DataMapper::Query.new(DataMapper::repository(:default), Cow)
 
       resources = [
-        {:id => 1, :composite => 2, :name => 'Betsy', :breed => 'Jersey'},
-        {:id => 10, :composite => 20, :name => 'Berta', :breed => 'Guernsey'}
+        {id: 1, composite: 2, name: 'Betsy', breed: 'Jersey'},
+        {id: 10, composite: 20, name: 'Berta', breed: 'Guernsey'}
       ]
 
       @collection = DataMapper::Collection.new(query, resources)
@@ -20,7 +20,7 @@ if defined?(::CSV)
       @empty_collection = DataMapper::Collection.new(query)
     end
 
-    it "should serialize a resource to CSV" do
+    it 'should serialize a resource to CSV' do
       peter = Cow.new
       peter.id = 44
       peter.composite = 344
@@ -30,14 +30,14 @@ if defined?(::CSV)
       peter.to_csv.chomp.split(',')[0..3].should == ['44','344','Peter','Long Horn']
     end
 
-    it "should serialize a collection to CSV" do
+    it 'should serialize a collection to CSV' do
       result = @collection.to_csv.gsub(/[[:space:]]+\n/, "\n")
-      result.split("\n")[0].split(',')[0..3].should == ['1','2','Betsy','Jersey']
-      result.split("\n")[1].split(',')[0..3].should == ['10','20','Berta','Guernsey']
+      result.split("\n")[0].split(',')[0..3].should == %w(1 2 Betsy Jersey)
+      result.split("\n")[1].split(',')[0..3].should == %w(10 20 Berta Guernsey)
     end
 
     it 'should integrate with dm-validations by providing one line per error' do
-      planet = Planet.create(:name => 'a')
+      planet = Planet.create(name: 'a')
       result = planet.errors.to_csv.gsub(/[[:space:]]+\n/, "\n").split("\n")
       result.should include("name,#{planet.errors[:name][0]}")
       result.should include("solar_system_id,#{planet.errors[:solar_system_id][0]}")
@@ -46,9 +46,9 @@ if defined?(::CSV)
 
     with_alternate_adapter do
 
-      describe "multiple repositories" do
+      describe 'multiple repositories' do
         before(:all) do
-          [ :default, :alternate ].each do |repository_name|
+          %i(default alternate).each do |repository_name|
             DataMapper.repository(repository_name) do
               DataMapper.finalize
               QuanTum::Cat.auto_migrate!
@@ -57,11 +57,11 @@ if defined?(::CSV)
           end
         end
 
-        it "should use the repsoitory for the model" do
-          gerry = QuanTum::Cat.create(:name => "gerry")
-          george = DataMapper.repository(:alternate){ QuanTum::Cat.create(:name => "george", :is_dead => false) }
+        it 'should use the repository for the model' do
+          gerry = QuanTum::Cat.create(name: 'gerry')
+          george = DataMapper.repository(:alternate){ QuanTum::Cat.create(name: 'george', is_dead: false) }
           gerry.to_csv.should_not match(/false/)
-          george.to_csv.should match(/false/)
+          george&.to_csv&.should match(/false/)
         end
       end
 
