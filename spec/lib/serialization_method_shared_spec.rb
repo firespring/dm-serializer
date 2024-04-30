@@ -1,11 +1,10 @@
-share_examples_for 'A serialization method that also serializes core classes' do
+shared_examples 'A serialization method that also serializes core classes' do
   # This spec ensures that we don't break any serialization methods attached
   # to core classes, such as Array
   before(:all) do
     %w(@harness).each do |ivar|
       raise "+#{ivar}+ should be defined in before block" unless instance_variable_get(ivar)
     end
-
     DataMapper.auto_migrate!
   end
 
@@ -21,8 +20,7 @@ share_examples_for 'A serialization method that also serializes core classes' do
       breed: 'Guernsey'
     )
     result = @harness.test(Cow.all.to_a)
-    expect(result[0].values_at('id', 'composite', 'name', 'breed')).to eq
-    [89, 34, 'Berta', 'Guernsey']
+    expect(result[0].values_at('id', 'composite', 'name', 'breed')).to eq [89, 34, 'Berta', 'Guernsey']
   end
 
   it 'serializes an array of collections' do
@@ -43,7 +41,7 @@ share_examples_for 'A serialization method that also serializes core classes' do
   end
 end
 
-share_examples_for 'A serialization method' do
+shared_examples 'A serialization method' do
   before(:all) do
     %w(@harness).each do |ivar|
       raise "+#{ivar}+ should be defined in before block" unless instance_variable_get(ivar)
@@ -204,8 +202,8 @@ share_examples_for 'A serialization method' do
       collection = DataMapper::Collection.new(query, query.model.load(resources, query))
 
       result = @harness.test(collection)
-      result[0].values_at(*keys).should == resources[0].values_at(*keys)
-      result[1].values_at(*keys).should == resources[1].values_at(*keys)
+      expect(result[0].values_at(*keys)).to == resources[0].values_at(*keys)
+      expect(result[1].values_at(*keys)).to == resources[1].values_at(*keys)
     end
 
     it 'should serialize an empty collection' do

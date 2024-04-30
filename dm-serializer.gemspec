@@ -20,5 +20,4 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency('dm-core',    '~> 1.3.0.beta')
   gem.add_runtime_dependency('fastercsv',  '~> 1.5.4')
   gem.add_runtime_dependency('multi_json', '~> 1.3.2')
-
 end

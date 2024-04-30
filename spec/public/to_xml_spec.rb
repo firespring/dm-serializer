@@ -1,4 +1,4 @@
-require 'spec_helper'
+require_relative '../spec_helper'
 require 'rexml/document'
 
 %i(rexml libxml nokogiri).each do |lib|
@@ -54,12 +54,12 @@ require 'rexml/document'
       end.new
     end
 
-    it_should_behave_like 'A serialization method'
+    it_behaves_like 'A serialization method'
 
     it 'should not include the XML prologue, so that the result can be embedded in other XML documents' do
       planet = Planet.new
       xml = planet.to_xml(element_name: 'aplanet')
-      xml.should_not match(/\A<?xml/)
+      expect(xml).not_to match(/\A<?xml/)
     end
 
     describe ':element_name option for Resource' do
