@@ -66,7 +66,7 @@ end
 
 describe DataMapper::Serializer, '#as_json' do
   it 'handles nil for options' do
-    expect { Cow.new.as_json(nil) }.to_not raise_error
+    expect { Cow.new.as_json(nil) }.not_to raise_error
   end
 
   it 'serializes Discriminator types as strings' do

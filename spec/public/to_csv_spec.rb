@@ -20,7 +20,7 @@ if defined?(::CSV)
       @empty_collection = DataMapper::Collection.new(query)
     end
 
-    it 'should serialize a resource to CSV' do
+    it 'serializes a resource to CSV' do
       peter = Cow.new
       peter.id = 44
       peter.composite = 344
@@ -30,13 +30,13 @@ if defined?(::CSV)
       expect(peter.to_csv.chomp.split(',')[0..3]).to == ['44','344','Peter','Long Horn']
     end
 
-    it 'should serialize a collection to CSV' do
+    it 'serializes a collection to CSV' do
       result = @collection.to_csv.gsub(/[[:space:]]+\n/, "\n")
       expect(result.split("\n")[0].split(',')[0..3]).to == %w(1 2 Betsy Jersey)
       expect(result.split("\n")[1].split(',')[0..3]).to == %w(10 20 Berta Guernsey)
     end
 
-    it 'should integrate with dm-validations by providing one line per error' do
+    it 'integrates with dm-validations by providing one line per error' do
       planet = Planet.create(name: 'a')
       result = planet.errors.to_csv.gsub(/[[:space:]]+\n/, "\n").split("\n")
       expect(result).to include("name,#{planet.errors[:name][0]}")
@@ -57,7 +57,7 @@ if defined?(::CSV)
           end
         end
 
-        it 'should use the repository for the model' do
+        it 'uses the repository for the model' do
           gerry = QuanTum::Cat.create(name: 'gerry')
           george = DataMapper.repository(:alternate){ QuanTum::Cat.create(name: 'george', is_dead: false) }
           expect(gerry.to_csv).not_to match(/false/)

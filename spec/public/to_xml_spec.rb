@@ -56,20 +56,20 @@ require 'rexml/document'
 
     it_behaves_like 'A serialization method'
 
-    it 'should not include the XML prologue, so that the result can be embedded in other XML documents' do
+    it 'does not include the XML prologue, so that the result can be embedded in other XML documents' do
       planet = Planet.new
       xml = planet.to_xml(element_name: 'aplanet')
       expect(xml).not_to match(/\A<?xml/)
     end
 
     describe ':element_name option for Resource' do
-      it 'should be used as the root node name by #to_xml' do
+      it 'is used as the root node name by #to_xml' do
         planet = Planet.new
         xml = planet.to_xml(element_name: 'aplanet')
         expect(REXML::Document.new(xml).elements[1].name).to eq 'aplanet'
       end
 
-      it 'when not specified the class name underscored and with slashes replaced with dashes should be used as the root node name' do
+      it 'when not specified the class name underscored and with slashes replaced with dashes is used as the root node name' do
         cat = QuanTum::Cat.new
         xml = cat.to_xml
         expect(REXML::Document.new(xml).elements[1].name).to eq 'quan_tum-cat'
@@ -83,12 +83,12 @@ require 'rexml/document'
         @collection = DataMapper::Collection.new(@query)
       end
 
-      it 'when not specified the class name tableized and with slashes replaced with dashes should be used as the root node name' do
+      it 'when not specified the class name tableized and with slashes replaced with dashes is used as the root node name' do
         xml = DataMapper::Collection.new(@query).to_xml
         expect(REXML::Document.new(xml).elements[1].name).to eq 'quan_tum-cats'
       end
 
-      it 'should be used as the root node name by #to_xml' do
+      it 'is used as the root node name by #to_xml' do
         resources = @model.load([{'id' => 1}], @query)
         @collection = DataMapper::Collection.new(@query, resources)
 
@@ -96,7 +96,7 @@ require 'rexml/document'
         expect(REXML::Document.new(xml).elements[1].name).to eq 'somanycats'
       end
 
-      it 'should respect :element_name for collection elements' do
+      it 'respects :element_name for collection elements' do
         resources = @model.load([{'id' => 1}], @query)
         @collection = DataMapper::Collection.new(@query, resources)
 

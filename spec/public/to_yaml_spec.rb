@@ -34,7 +34,7 @@ describe DataMapper::Serializer, '#to_yaml' do
   it_behaves_like 'A serialization method'
   it_behaves_like 'A serialization method that also serializes core classes'
 
-  it 'should allow static YAML dumping' do
+  it 'allows static YAML dumping' do
     object = Cow.create(
       id: 89,
       composite: 34,
@@ -45,7 +45,7 @@ describe DataMapper::Serializer, '#to_yaml' do
     expect(result['name']).to == 'Berta'
   end
 
-  it 'should allow static YAML dumping of a collection' do
+  it 'allows static YAML dumping of a collection' do
     Cow.create(
       id: 89,
       composite: 34,
