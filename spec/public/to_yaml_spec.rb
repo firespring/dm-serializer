@@ -1,4 +1,4 @@
-require 'spec_helper'
+require_relative '../spec_helper'
 
 describe DataMapper::Serializer, '#to_yaml' do
   #
@@ -31,10 +31,10 @@ describe DataMapper::Serializer, '#to_yaml' do
     @to_yaml  = true
   end
 
-  it_should_behave_like 'A serialization method'
-  it_should_behave_like 'A serialization method that also serializes core classes'
+  it_behaves_like 'A serialization method'
+  it_behaves_like 'A serialization method that also serializes core classes'
 
-  it 'should allow static YAML dumping' do
+  it 'allows static YAML dumping' do
     object = Cow.create(
       id: 89,
       composite: 34,
@@ -42,10 +42,10 @@ describe DataMapper::Serializer, '#to_yaml' do
       breed: 'Guernsey'
     )
     result = @harness.deserialize(YAML.dump(object))
-    result['name'].should == 'Berta'
+    expect(result['name']).to eq 'Berta'
   end
 
-  it 'should allow static YAML dumping of a collection' do
+  it 'allows static YAML dumping of a collection' do
     Cow.create(
       id: 89,
       composite: 34,
