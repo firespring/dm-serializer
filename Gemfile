@@ -27,6 +27,7 @@ group :development do
   gem 'dm-validations', DM_VERSION, options.dup
   gem 'rake'
   gem 'rspec'
+  gem 'simplecov'
 end
 
 group :testing do
@@ -36,7 +37,6 @@ end
 
 platforms :mri_18 do
   group :quality do
-    gem 'rcov'
     gem 'yard'
     gem 'yardstick'
   end
