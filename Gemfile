@@ -25,6 +25,8 @@ gem 'rexml'
 group :development do
   options[SOURCE] = "#{DATAMAPPER}/dm-validations#{REPO_POSTFIX}"
   gem 'dm-validations', DM_VERSION, options.dup
+  gem 'pry'
+  gem 'pry-byebug'
   gem 'rake'
   gem 'rspec'
   gem 'simplecov'
